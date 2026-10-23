@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUEL | پنل مدیریت</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Tahoma, Vazirmatn, sans-serif;
+    min-height: 100vh;
+    color: #eaf6ff;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(0, 180, 255, 0.2), transparent 45%),
+      radial-gradient(circle at 90% 100%, rgba(0, 255, 140, 0.15), transparent 50%),
+      linear-gradient(160deg, #04121f 0%, #071c2e 45%, #05261c 100%);
+    padding: 24px 16px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  .brand-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
+  .brand {
+    font-size: 26px; font-weight: 900; letter-spacing: 3px; color: #fff;
+    text-shadow: 0 0 12px rgba(0,224,255,0.8), 0 0 26px rgba(0,224,255,0.4);
+    font-family: Arial Black, Tahoma, sans-serif;
+  }
+  .brand small { display: block; font-size: 11px; letter-spacing: 2px; color: #8fb3c9; font-family: Tahoma, sans-serif; font-weight: normal; text-shadow: none; margin-top: 2px; }
+  .login-card {
+    background: linear-gradient(180deg, rgba(10,30,48,0.95), rgba(6,20,32,0.98));
+    border-radius: 16px; padding: 30px 26px; max-width: 360px; margin: 60px auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,180,255,0.15);
+  }
+  .login-card h2 { font-size: 17px; text-align: center; margin-bottom: 18px; color: #b7d4e6; }
+  .login-card input {
+    width: 100%; padding: 12px; margin-bottom: 14px;
+    border-radius: 10px; border: 1px solid #123a55;
+    background: #04121f; color: #eaf6ff; font-family: inherit; font-size: 14px;
+  }
+  .login-card input:focus { outline: none; border-color: #00c8ff; box-shadow: 0 0 0 3px rgba(0,200,255,0.15); }
+  .login-card button, .btn {
+    width: 100%; padding: 12px; border: none; border-radius: 10px;
+    background: linear-gradient(90deg, #00b36b, #00c8ff);
+    color: #04121f; font-weight: bold; font-size: 14px; cursor: pointer; font-family: inherit;
+  }
+  .login-err { color: #ff6b6b; text-align: center; font-size: 13px; margin-top: 12px; min-height: 18px; }
+  .panel { display: none; }
+  .panel.show { display: block; }
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; }
+  .stat { background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.2); border-radius: 10px; padding: 8px 14px; font-size: 13px; }
+  .stat b { color: #00e0ff; font-size: 16px; }
+  .btn-sm { width: auto; padding: 9px 16px; font-size: 13px; }
+  .btn-ghost { background: transparent; border: 1px solid #123a55; color: #b7d4e6; }
+  .table-wrap {
+    background: rgba(10,30,48,0.9); border-radius: 14px; overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,180,255,0.12);
+    overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 620px; }
+  th { background: rgba(0,120,180,0.25); color: #cdf3ff; padding: 12px 10px; text-align: right; font-weight: bold; white-space: nowrap; }
+  td { padding: 11px 10px; border-top: 1px solid rgba(255,255,255,0.06); white-space: nowrap; }
+  tr:hover td { background: rgba(0,200,255,0.05); }
+  .phone-cell { direction: ltr; text-align: right; font-family: monospace; }
+  .empty { text-align: center; padding: 40px; color: #6b8ca3; }
+  .loading { text-align: center; padding: 30px; color: #8fb3c9; }
+  .spinner { width: 26px; height: 26px; margin: 0 auto 12px; border: 3px solid rgba(0,200,255,0.2); border-top-color: #00c8ff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand-bar" style="display:none;" id="brandBar">
+    <div class="brand">DUEL <small>پنل مدیریت مسابقات</small></div>
+  </div>
+
+  <div class="login-card" id="loginCard">
+    <h2>🔒 ورود مدیران</h2>
+    <input type="password" id="passInput" placeholder="رمز عبور را وارد کنید">
+    <button id="loginBtn">ورود</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="toolbar">
+      <div class="stats"><div class="stat">تعداد ثبت‌نام: <b id="countStat">۰</b></div></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" id="refreshBtn">🔄 به‌روزرسانی</button>
+        <button class="btn btn-sm btn-ghost" id="logoutBtn">خروج</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="loading" id="loadingBox"><div class="spinner"></div>در حال دریافت لیست...</div>
+      <table id="regTable" style="display:none;">
+        <thead>
+          <tr><th>#</th><th>نام و نام خانوادگی</th><th>شماره همراه</th><th>ترم و رشته</th><th>تیم انتخابی</th><th>زمان ثبت</th></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty" id="emptyBox" style="display:none;">هنوز ثبت‌نامی انجام نشده است.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUSwAL59ZcbK1atQz55vAAHky3EtQ3ynzCjbAI9wqEuUP3-fVOLL5wP3FruBk3Axm/exec";
+const ADMIN_PASSWORD = "duel2026";
+
+const loginCard = document.getElementById("loginCard");
+const panel = document.getElementById("panel");
+const brandBar = document.getElementById("brandBar");
+const passInput = document.getElementById("passInput");
+const loginErr = document.getElementById("loginErr");
+const loadingBox = document.getElementById("loadingBox");
+const regTable = document.getElementById("regTable");
+const tableBody = document.getElementById("tableBody");
+const emptyBox = document.getElementById("emptyBox");
+const countStat = document.getElementById("countStat");
+
+function faNum(n) { return String(n).replace(/[0-9]/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]); }
+
+function showPanel() {
+  loginCard.style.display = "none";
+  brandBar.style.display = "flex";
+  panel.classList.add("show");
+  loadData();
+}
+
+document.getElementById("loginBtn").addEventListener("click", function() {
+  if (passInput.value === ADMIN_PASSWORD) { loginErr.textContent = ""; showPanel(); }
+  else { loginErr.textContent = "رمز عبور اشتباه است."; }
+});
+passInput.addEventListener("keydown", function(e) { if (e.key === "Enter") document.getElementById("loginBtn").click(); });
+document.getElementById("logoutBtn").addEventListener("click", function() {
+  panel.classList.remove("show");
+  brandBar.style.display = "none";
+  loginCard.style.display = "block";
+  passInput.value = "";
+});
+document.getElementById("refreshBtn").addEventListener("click", loadData);
+
+async function loadData() {
+  loadingBox.style.display = "block";
+  regTable.style.display = "none";
+  emptyBox.style.display = "none";
+  try {
+    const res = await fetch(SCRIPT_URL + "?t=" + Date.now());
+    const data = await res.json();
+    if (!data || data.length === 0) {
+      loadingBox.style.display = "none";
+      emptyBox.style.display = "block";
+      countStat.textContent = faNum(0);
+      return;
+    }
+    data.reverse();
+    tableBody.innerHTML = "";
+    data.forEach(function(row, i) {
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + faNum(i + 1) + "</td>" +
+        "<td>" + escapeHtml(row.name) + "</td>" +
+        '<td class="phone-cell">' + escapeHtml(row.phone) + "</td>" +
+        "<td>" + escapeHtml(row.term) + "</td>" +
+        "<td>" + escapeHtml(row.team) + "</td>" +
+        "<td>" + escapeHtml(row.timestamp) + "</td>";
+      tableBody.appendChild(tr);
+    });
+    countStat.textContent = faNum(data.length);
+    loadingBox.style.display = "none";
+    regTable.style.display = "table";
+  } catch (err) {
+    loadingBox.innerHTML = '<div style="color:#ff6b6b;">خطا در دریافت اطلاعات. دوباره تلاش کنید.</div>';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s || "").replace(/[&<>"']/g, function(c) {
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+</script>
+</body>
+</html>

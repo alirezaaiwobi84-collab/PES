@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUEL | ثبت‌نام مسابقات PES</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Tahoma, Vazirmatn, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #eaf6ff;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(0, 180, 255, 0.25), transparent 45%),
+      radial-gradient(circle at 90% 100%, rgba(0, 255, 140, 0.18), transparent 50%),
+      linear-gradient(160deg, #04121f 0%, #071c2e 45%, #05261c 100%);
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.015) 0 40px,
+      transparent 40px 80px
+    );
+    pointer-events: none;
+  }
+
+  .card {
+    position: relative;
+    background: linear-gradient(180deg, rgba(10, 30, 48, 0.95), rgba(6, 20, 32, 0.98));
+    border-radius: 18px;
+    padding: 0 0 30px;
+    width: 100%;
+    max-width: 430px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 180, 255, 0.15);
+    overflow: hidden;
+  }
+
+  /* ===== هدر با برند DUEL ===== */
+  .hero {
+    position: relative;
+    height: 150px;
+    background:
+      radial-gradient(circle at 70% 30%, rgba(0, 200, 255, 0.55), transparent 60%),
+      linear-gradient(135deg, #003a5c 0%, #0066a3 40%, #00b36b 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,0.06) 0 12px,
+      transparent 12px 24px
+    );
+  }
+
+  .brand {
+    z-index: 2;
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow:
+      0 0 12px rgba(0, 224, 255, 0.9),
+      0 0 30px rgba(0, 224, 255, 0.5),
+      0 4px 10px rgba(0,0,0,0.6);
+    font-family: Arial Black, Tahoma, sans-serif;
+    line-height: 1;
+  }
+  .brand-tag {
+    z-index: 2;
+    margin-top: 8px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #cdf3ff;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  }
+  .hero .ball {
+    position: absolute;
+    font-size: 46px;
+    opacity: 0.18;
+    left: 18px;
+    top: 14px;
+    z-index: 1;
+  }
+
+  .form-body { padding: 22px 26px 0; }
+
+  .sub {
+    font-size: 13px;
+    color: #8fb3c9;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  label { display: block; font-size: 13px; margin-bottom: 6px; color: #b7d4e6; }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    border: 1px solid #123a55;
+    background: #04121f;
+    color: #eaf6ff;
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus {
+    outline: none;
+    border-color: #00c8ff;
+    box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.15);
+  }
+  input::placeholder { color: #5a7a8f; }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #00b36b, #00c8ff);
+    color: #04121f;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 6px 20px rgba(0, 200, 255, 0.25);
+  }
+  button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0, 200, 255, 0.35); }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .msg { text-align: center; font-size: 14px; margin-top: 16px; min-height: 20px; }
+  .err { color: #ff6b6b; }
+
+  /* ===== صفحه موفقیت ===== */
+  .success {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 34px 26px 10px;
+    animation: fadeUp 0.5s ease;
+  }
+  .success.show { display: flex; }
+  .form-body.hide { display: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .check-wrap {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,255,157,0.15), transparent 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .check-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid #00ff9d;
+    animation: ring 1.2s ease-out infinite;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes ring {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  .check-wrap svg {
+    width: 52px;
+    height: 52px;
+    stroke: #00ff9d;
+    stroke-width: 5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .check-wrap svg path {
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: draw 0.6s 0.25s ease forwards;
+  }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .success h2 {
+    font-size: 20px;
+    color: #00ff9d;
+    margin-bottom: 10px;
+    text-shadow: 0 0 14px rgba(0,255,157,0.4);
+  }
+  .success p {
+    font-size: 14px;
+    color: #b7d4e6;
+    line-height: 1.9;
+    margin-bottom: 22px;
+  }
+  .success .name-hl { color: #00e0ff; font-weight: bold; }
+
+  .again-btn {
+    background: linear-gradient(90deg, #0066a3, #00c8ff);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0, 200, 255, 0.25);
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="hero">
+      <span class="ball">⚽</span>
+      <div class="brand">DUEL</div>
+      <div class="brand-tag">PES TOURNAMENT</div>
+    </div>
+
+    <!-- فرم -->
+    <div class="form-body" id="formBody">
+      <p class="sub">فرم زیر را تکمیل کنید</p>
+      <form id="regForm">
+        <label>نام و نام خانوادگی</label>
+        <input type="text" name="name" required>
+
+        <label>شماره همراه</label>
+        <input type="tel" name="phone" pattern="09[0-9]{9}" placeholder="09xxxxxxxxx" required>
+
+        <label>ترم و رشته</label>
+        <input type="text" name="term" placeholder="مثلاً ترم ۳ - پرستاری" required>
+
+        <label>تیم انتخابی</label>
+        <input type="text" name="team" placeholder="نام تیم خود را وارد کنید" required>
+
+        <button type="submit" id="submitBtn">ثبت‌نام</button>
+        <div class="msg" id="msg"></div>
+      </form>
+    </div>
+
+    <!-- صفحه موفقیت -->
+    <div class="success" id="successBox">
+      <div class="check-wrap">
+        <svg viewBox="0 0 52 52">
+          <path d="M14 27 L23 36 L39 18"></path>
+        </svg>
+      </div>
+      <h2>ثبت‌نام موفق!</h2>
+      <p id="successText">ثبت‌نام شما با موفقیت انجام شد.</p>
+      <button class="again-btn" id="againBtn">ثبت‌نام جدید</button>
+    </div>
+  </div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUSwAL59ZcbK1atQz55vAAHky3EtQ3ynzCjbAI9wqEuUP3-fVOLL5wP3FruBk3Axm/exec";
+
+const form = document.getElementById("regForm");
+const formBody = document.getElementById("formBody");
+const successBox = document.getElementById("successBox");
+const successText = document.getElementById("successText");
+const msg = document.getElementById("msg");
+const submitBtn = document.getElementById("submitBtn");
+
+let done = false;
+
+function showSuccess(data) {
+  if (done) return;
+  done = true;
+  const firstName = (data.name || "").trim().split(" ")[0] || "";
+  successText.innerHTML =
+    (firstName ? '<span class="name-hl">' + firstName + '</span> عزیز، ' : '') +
+    'ثبت‌نام شما در مسابقات PES مجموعه <b>DUEL</b> با موفقیت ثبت شد.<br>' +
+    'هماهنگی زمان مسابقه متعاقباً انجام می‌شود.';
+  formBody.classList.add("hide");
+  successBox.classList.add("show");
+  form.reset();
+  submitBtn.disabled = false;
+}
+
+function showError(text) {
+  if (done) return;
+  done = true;
+  msg.textContent = text || "❌ خطا در ارسال. لطفاً دوباره تلاش کنید.";
+  msg.className = "msg err";
+  submitBtn.disabled = false;
+}
+
+form.addEventListener("submit", async function(e) {
+  e.preventDefault();
+  done = false;
+  submitBtn.disabled = true;
+  msg.textContent = "در حال ارسال...";
+  msg.className = "msg";
+
+  const data = Object.fromEntries(new FormData(this).entries());
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(data)
+    });
+
+    if (!res.ok) {
+      showError("❌ سرور پاسخ نداد. دوباره تلاش کنید.");
+      return;
+    }
+
+    const result = await res.json();
+
+    if (result && result.ok === true) {
+      showSuccess(data);
+    } else {
+      showError("❌ ثبت‌نام انجام نشد. لطفاً دوباره تلاش کنید.");
+    }
+  } catch (err) {
+    showError("❌ خطا در ارتباط با سرور. اینترنت را چک کنید و دوباره تلاش کنید.");
+  }
+});
+
+document.getElementById("againBtn").addEventListener("click", function() {
+  successBox.classList.remove("show");
+  formBody.classList.remove("hide");
+  msg.textContent = "";
+  done = false;
+});
+</script>
+</body>
+</html>
